@@ -65,9 +65,9 @@ def tables(conn):
         kda NUMERIC(5,1),
         kp NUMERIC(3,2),
         win BOOLEAN NOT NULL,
-        UNIQUE (match_id, puuid);
+        UNIQUE (match_id, puuid)
+    );
     
     CREATE INDEX IF NOT EXISTS idx_mpart_puuid     ON match_participation (puuid);   
     CREATE INDEX IF NOT EXISTS idx_match_participation_champion ON match_participation (champion_id);
-    )
     """
