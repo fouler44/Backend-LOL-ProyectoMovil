@@ -1,0 +1,19 @@
+from sqlalchemy import Column, String, Text, Integer, DateTime, CheckConstraint
+from sqlalchemy.sql import func
+from db import Base
+
+class Player(Base):
+    __tablename__ = "player"
+
+    puuid = Column(String(78), primary_key=True)
+    game_name = Column(Text, nullable=False)
+    tagline = Column(Text, nullable=False)
+    platform = Column(String(5), nullable=False)
+    player_level = Column(Integer, nullable=False)
+    player_icon = Column(Integer)
+    updated_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    __table_args__ = (
+        CheckConstraint("player_level >= 0"),
+        CheckConstraint("platform IN ('LA1','LA2','NA1','EUW1','EUN1','BR1','OC1','JP1','KR','TR1')"),
+    )

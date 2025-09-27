@@ -70,12 +70,14 @@ def transform_match_data(match_data):
             duration_seconds = (end_ts - start_ts) // 1000 # ms -> s
         
     game_mode = clean_str(info.get("gameMode") or "UNKNOWN", max_len=50)
+    game_status = clean_str(info.get("endOfGameResult") or "UNKNOWN", max_len=30)
     patch_version = clean_str(info.get("gameVersion") or "UNKNOWN")
     
     match_info = {
         "match_id": match_id,
         "duration_seconds": duration_seconds,
         "game_mode": game_mode,
+        "game_status": game_status,
         "patch_version": patch_version
     }
     
