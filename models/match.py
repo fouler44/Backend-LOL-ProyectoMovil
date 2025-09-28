@@ -23,14 +23,16 @@ class MatchParticipation(Base):
 
     participation_id = Column(Integer, primary_key=True, autoincrement=True)
     match_id = Column(String(50), ForeignKey("lol_match.match_id", ondelete="CASCADE"), nullable=False)
-    puuid = Column(String(78), ForeignKey("player.puuid", ondelete="CASCADE"), nullable=False)
-    champion_id = Column(Integer, ForeignKey("champion.champion_id"), nullable=False)
-
+    
+    puuid = Column(String(78), nullable=False)
+    game_name = Column(String(40), nullable=False)
+    tag = Column(String(5), nullable=False)
+    champion_id = Column(Integer, nullable=False)
     kills = Column(Integer)
     assists = Column(Integer)
     deaths = Column(Integer)
-    total_damage = Column(Integer)
-    damage_per_min = Column(Numeric(6, 1))
+    total_damage = Column(Numeric(6, 1))
+    damage_per_min = Column(Integer)
     lane = Column(String(20))
     champion_level = Column(Integer)
     item_slots = Column(ARRAY(Integer))
