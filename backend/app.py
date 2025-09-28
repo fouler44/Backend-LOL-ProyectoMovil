@@ -2,6 +2,8 @@ from flask import Flask
 import os
 from dotenv import load_dotenv
 
+from flask_jwt_extended import JWTManager
+
 from routes.base import base_routes
 #from routes.players import player_routes
 #from routes.stats import stat_routes
@@ -11,6 +13,8 @@ load_dotenv()
 def create_app():
   app = Flask(__name__)
   #init_db(app)
+  app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET")
+  jwt = JWTManager(app)
   app.register_blueprint(base_routes, url_prefix="/")
   #app.register_blueprint(player_routes, url_prefix="/players")
   #app.register_blueprint(stat_routes, url_prefix="/stats")

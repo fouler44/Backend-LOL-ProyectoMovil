@@ -1,3 +1,4 @@
+import datetime
 from flask import Blueprint, request, jsonify, redirect
 
 from flask_jwt_extended import create_access_token
@@ -20,16 +21,32 @@ def landing():
     code = 200
     return jsonify({
         "code": code,
-        "message": "OK"
+        "msg": "OK"
     }), code
 
-@base_routes.route("/login", methods=["GET", "POST"])
+@base_routes.route("/login", methods=["POST"])
 def login():
-    if(request.method == "GET"):
-        code = 200
+    data = request.get_json()
+    username = data.get("username")
+    password = data.get("password")
+
+    if not username or not password:
+        code = 400
         return jsonify({
             "code": code,
-            "message": "OK"
+            "msg": "Username and password required"
         }), code
-    else:
-        return redirect("/login")
+    
+    access_token = create_access_token(identity=username, expires_delta=datetime.timedelta(minutes=60))
+    code = 200
+    return jsonify(access_token=access_token)
+
+@base_routes.route("/dashboard", methods=["GET"])
+@jwt_required()
+def dashboard():
+    user = get_jwt_identity()
+    code = 200
+    return jsonify({
+        "code": code,
+        "msg": f"Logged in as {user}"
+    }), code
