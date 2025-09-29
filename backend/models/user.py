@@ -10,4 +10,13 @@ class AppUser(Base):
     hashed_password = Column(Text, nullable=False)
     puuid = Column(String(78))
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    def data(self):
+        return {
+            "user_id": self.user_id,
+            "username": self.username,
+            "hashed_password": self.hashed_password,
+            "puuid": self.puuid,
+            "created_at": self.created_at
+        }
     

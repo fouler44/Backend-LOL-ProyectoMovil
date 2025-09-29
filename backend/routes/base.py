@@ -46,6 +46,17 @@ def login():
             "msg": "Username and password required"
         }), code
     
+    conn = SessionLocal()
+    user = conn.scalars(select(AppUser).filter_by(username=username).limit(1)).first()
+
+    if not user or not bcrypt.check_password_hash(user.data()["hashed_password"], password):
+        code = 401
+        return jsonify({
+            "code": code,
+            "msg": "Invalid credentials"
+        }), code
+
+
     access_token = create_access_token(identity=username, expires_delta=datetime.timedelta(minutes=60))
     code = 200
     return jsonify(access_token=access_token)
