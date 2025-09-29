@@ -8,11 +8,9 @@ def upsert_player(db: Session, **kwargs):
     player = db.query(Player).filter(Player.puuid == kwargs["puuid"]).first()
     
     if player:
-        # Actualizar campos
         for k, v in kwargs.items():
             setattr(player, k, v)
     else:
-        # Crear nuevo
         player = Player(**kwargs)
         db.add(player)
     
@@ -20,5 +18,4 @@ def upsert_player(db: Session, **kwargs):
 
 
 def get_player_by_puuid(db: Session, puuid: str):
-    """Obtiene un jugador por PUUID"""
     return db.query(Player).filter(Player.puuid == puuid).first()

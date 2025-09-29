@@ -23,7 +23,6 @@ def sync_my_matches():
             data = request.get_json() or {}
             count = data.get("count", 20)
             
-            # Validar count
             if not isinstance(count, int) or count < 1 or count > 100:
                 return jsonify({
                     "code": 400,
@@ -74,40 +73,7 @@ def get_my_match_history():
                 }), 404
             
             limit = request.args.get("limit", 20, type=int)
-            
-            # Validar límite
-            if limit < 1 or limit > 100:
-                return jsonify({
-                    "code": 400,
-                    "msg": "El límite debe estar entre 1 y 100"
-                }), 400
-            
-            matches = get_player_match_history(db, user.puuid, limit)
-            
-            return jsonify({
-                "code": 200,
-                "data": matches
-            }), 200
-            
-        except Exception as e:
-            return jsonify({
-                "code": 500,
-                "msg": "Error al obtener historial",
-                "detail": str(e)
-            }), 500
-
-@match_routes.route("/history/<puuid>", methods=["GET"])
-def get_player_history(puuid: str):
-    with get_session() as db:
-        try:
-            # Validar PUUID
-            if not puuid or len(puuid) > 78:
-                return jsonify({
-                    "code": 400,
-                    "msg": "PUUID inválido"
-                }), 400
-            
-            limit = request.args.get("limit", 20, type=int)
+            offset = request.args.get("offset", 0, type=int)
             
             if limit < 1 or limit > 100:
                 return jsonify({
@@ -115,17 +81,22 @@ def get_player_history(puuid: str):
                     "msg": "El límite debe estar entre 1 y 100"
                 }), 400
             
-            matches = get_player_match_history(db, puuid, limit)
-            
-            if not matches:
+            if offset < 0:
                 return jsonify({
-                    "code": 404,
-                    "msg": "No se encontraron partidas para este jugador"
-                }), 404
+                    "code": 400,
+                    "msg": "El offset no puede ser negativo"
+                }), 400
+            
+            matches = get_player_match_history(db, user.puuid, limit, offset)
             
             return jsonify({
                 "code": 200,
-                "data": matches
+                "data": matches,
+                "pagination": {
+                    "limit": limit,
+                    "offset": offset,
+                    "returned": len(matches)
+                }
             }), 200
             
         except Exception as e:
@@ -139,7 +110,6 @@ def get_player_history(puuid: str):
 def get_match_details(match_id: str):
     with get_session() as db:
         try:
-            # Validar match_id
             if not match_id or len(match_id) > 50:
                 return jsonify({
                     "code": 400,

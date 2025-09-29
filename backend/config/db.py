@@ -1,4 +1,3 @@
-# config/db.py
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 from urllib.parse import quote_plus
@@ -6,12 +5,11 @@ from config.config import DB_CONFIG
 
 def _build_url(cfg: dict) -> str:
     user = cfg["user"]
-    pwd = quote_plus(cfg["password"])  # por si hay caracteres especiales
+    pwd = quote_plus(cfg["password"])
     host = cfg["host"]
     port = cfg["port"]
     db   = cfg["dbname"]
 
-    # sslmode es opcional; si usas SSL en producción, cámbialo a 'require'
     sslmode = cfg.get("sslmode", "disable")
     query = f"?sslmode={sslmode}" if sslmode else ""
 
@@ -21,9 +19,9 @@ DATABASE_URL = _build_url(DB_CONFIG)
 
 engine = create_engine(
     DATABASE_URL,
-    echo=True,             # ponlo en False en prod
-    future=True,           # API 2.0
-    pool_pre_ping=True,    # evita conexiones muertas
+    echo=False,           
+    future=True,
+    pool_pre_ping=True,
 )
 
 SessionLocal = sessionmaker(
