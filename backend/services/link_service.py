@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from crud.player import upsert_player
 from crud.user import update_user_puuid, get_user_by_username
-from clients.riot import get_puuid_by_gametag, get_summoner
+from clients.riot import get_puuid_by_gametag, get_summoner 
 
 def link_account(db: Session, username, game_name, tag, platform):
     
@@ -10,7 +10,7 @@ def link_account(db: Session, username, game_name, tag, platform):
         raise ValueError(f"Usuario '{username}' no encontrado")
     
     # Obtener PUUID
-    puuid = get_puuid_by_gametag(game_name, tag)
+    puuid = get_puuid_by_gametag(game_name, tag, platform)
     
     # Obtener datos del perfil
     profile = get_summoner(puuid, platform)

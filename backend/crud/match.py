@@ -1,10 +1,6 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import and_
-from backend.models.match import LolMatch, MatchParticipation
-
-from sqlalchemy.orm import Session
-from sqlalchemy import and_
-from backend.models.match import LolMatch, MatchParticipation
+from models.match import LolMatch, MatchParticipation
 
 def upsert_match(db: Session, **kwargs):
     """Inserta o actualiza una partida"""

@@ -104,6 +104,8 @@ def transform_match_data(match_data):
         game_name = clean_str(p.get("riotIdGameName"), max_len=40)
         tag = clean_str(p.get("riotIdTagline"), max_len=5)
 
+        team_id = coerce_int(p.get("teamId"), 100)
+        
         champion_id = coerce_int(p.get("championId"), 0)
 
         kills = coerce_int(p.get("kills", 0))
@@ -142,6 +144,7 @@ def transform_match_data(match_data):
             "puuid": puuid,
             "game_name": game_name,
             "tag": tag,
+            "team_id": team_id,
             "champion_id": champion_id,
             "kills": kills,
             "assists": assists,

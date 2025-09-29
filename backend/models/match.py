@@ -2,7 +2,7 @@ from sqlalchemy import (
     Column, Index, String, Integer, ForeignKey, Boolean,
     CheckConstraint, Numeric, ARRAY, UniqueConstraint
 )
-from backend.config.db import Base
+from config.db import Base 
 
 class LolMatch(Base):
     __tablename__ = "lol_match"
@@ -27,6 +27,7 @@ class MatchParticipation(Base):
     puuid = Column(String(78), nullable=False)
     game_name = Column(String(40), nullable=False)
     tag = Column(String(5), nullable=False)
+    team_id = Column(Integer, nullable=False)
     champion_id = Column(Integer, nullable=False)
     kills = Column(Integer)
     assists = Column(Integer)

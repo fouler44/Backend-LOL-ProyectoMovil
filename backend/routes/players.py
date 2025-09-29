@@ -1,58 +1,13 @@
 import os
 import requests
-
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import get_jwt_identity, jwt_required
-
 from config.db import get_session
-from clients.riot import get_puuid_by_gametag
 from crud.player import get_player_by_puuid
-from crud.user import get_user_by_id
-from services.link_service import link_account
+from crud.user import get_user_by_id  
+from services.link_service import link_account 
 
 player_routes = Blueprint("players", __name__)
-
-@player_routes.route("/", methods=["GET"])
-def landing():
-    code = 200
-    return jsonify({
-        "code": code,
-        "msg": "OK"
-    }), code
-
-@player_routes.route("/<puuid>", methods=["GET"])
-def get_by_puuid(puuid):
-    key = os.getenv("RIOT_API_KEY")
-    req = requests.get(f"https://americas.api.riotgames.com/riot/account/v1/accounts/by-puuid/{puuid}?api_key={key}")
-    if(req.status_code != 200):
-        code = 404
-        return jsonify({
-            "code": code,
-            "msg": "Account not found"
-        }), code
-    
-    code = 200
-    return jsonify({
-        "code": code,
-        "data": req.json()
-    }), code
-
-@player_routes.route("/<user>/<tag>", methods=["GET"])
-def get_by_usertag(user, tag):
-    key = os.getenv("RIOT_API_KEY")
-    req = requests.get(f"https://americas.api.riotgames.com/riot/account/v1/accounts/by-riot-id/{user}/{tag}?api_key={key}")
-    if(req.status_code != 200):
-        code = 404
-        return jsonify({
-            "code": code,
-            "msg": "Account not found"
-        }), code
-    
-    code = 200
-    return jsonify({
-        "code": code,
-        "data": req.json()
-    }), code
     
 @player_routes.route("/link", methods=["POST"])
 @jwt_required()

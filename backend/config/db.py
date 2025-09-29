@@ -2,8 +2,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 from urllib.parse import quote_plus
-
-from backend.config.config import DB_CONFIG  # ajusta el import a tu estructura real
+from config.config import DB_CONFIG
 
 def _build_url(cfg: dict) -> str:
     user = cfg["user"]
