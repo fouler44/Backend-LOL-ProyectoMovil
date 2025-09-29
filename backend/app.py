@@ -8,6 +8,7 @@ from routes.base import base_routes
 from routes.players import player_routes
 #from routes.stats import stat_routes
 from routes.users import user_routes
+from routes.match import match_routes
 
 load_dotenv()
 def create_app():
@@ -19,6 +20,7 @@ def create_app():
   app.register_blueprint(player_routes, url_prefix="/players")
   #app.register_blueprint(stat_routes, url_prefix="/stats")
   app.register_blueprint(user_routes, url_prefix="/users")
+  app.register_blueprint(match_routes, url_prefix="/matches")
   return app
 
 app = create_app()

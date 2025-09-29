@@ -15,5 +15,5 @@ class Player(Base):
 
     __table_args__ = (
         CheckConstraint("player_level >= 0"),
-        CheckConstraint("platform IN ('LA1','LA2','NA1','EUW1','EUN1','BR1','OC1','JP1','KR','TR1')"),
+        CheckConstraint("platform IN ('LAN','LAS','NA','BR','EUW','EUNE','TR','RU','KR','JP','OCE')"),
     )

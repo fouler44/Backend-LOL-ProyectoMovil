@@ -1,4 +1,4 @@
-# app/db.py
+# config/db.py
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 from urllib.parse import quote_plus
