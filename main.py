@@ -1,4 +1,4 @@
-from db import engine, Base
+from backend.config.db import engine, Base
 import models  # asegura que se importen/rexporten todas las clases vía __init__.py
 
 def init_db():

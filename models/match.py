@@ -2,7 +2,7 @@ from sqlalchemy import (
     Column, Index, String, Integer, ForeignKey, Boolean,
     CheckConstraint, Numeric, ARRAY, UniqueConstraint
 )
-from db import Base
+from backend.config.db import Base
 
 class LolMatch(Base):
     __tablename__ = "lol_match"

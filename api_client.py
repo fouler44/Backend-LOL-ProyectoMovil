@@ -1,6 +1,6 @@
 import requests
 import time
-from config import RIOT_API_KEY
+from backend.config.config import RIOT_API_KEY
 
 TIMEOUT = 10
 
