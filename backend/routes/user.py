@@ -146,3 +146,43 @@ def change_puuid():
         "code": code,
         "msg": f"PUUID del usuario {username} actualizada: {puuid}"
     })
+
+@user_routes.route("/delete", methods=["DELETE"])
+@jwt_required()
+def delete_user():
+    data = request.get_json()
+    username = get_jwt_identity()
+    password = data.get("password")
+    if not password:
+        code = 400
+        return jsonify({
+            "code": code,
+            "msg": "Se requiere el parámetro 'password'"
+        }), code
+
+    conn = SessionLocal()
+    user = conn.scalars(select(AppUser).filter_by(username=username)).first()
+    if not user:
+        code = 404
+        return jsonify({
+            "code": code,
+            "msg": "El usuario proporcionado no existe"
+        }), code
+    
+    user_data = user.data()
+    if not bcrypt.check_password_hash(user_data["hashed_password"], password):
+        code = 401
+        return jsonify({
+            "code": code,
+            "msg": "Credenciales incorrectas"
+        }), code
+    
+    conn.delete(user)
+    conn.commit()
+    conn.close()
+
+    code = 200
+    return jsonify({
+        "code": code,
+        "msg": f"Usuario {username} eliminado"
+    })
