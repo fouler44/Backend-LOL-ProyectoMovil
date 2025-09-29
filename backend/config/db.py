@@ -13,7 +13,7 @@ def _build_url(cfg: dict) -> str:
     sslmode = cfg.get("sslmode", "disable")
     query = f"?sslmode={sslmode}" if sslmode else ""
 
-    return f"postgresql+psycopg2://{user}:{pwd}@{host}:{port}/{db}{query}"
+    return f"postgresql://{user}:{pwd}@{host}:{port}/{db}"
 
 DATABASE_URL = _build_url(DB_CONFIG)
 
