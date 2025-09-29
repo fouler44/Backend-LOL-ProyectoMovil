@@ -19,9 +19,8 @@ def upsert_match(db: Session, **kwargs):
 def insert_participation(db: Session, **kwargs):
     """
     Inserta una participación.
-    Si ya existe (match_id + puuid), no hace nada por el UniqueConstraint.
+    Verifica si ya existe, si existe no hace nada
     """
-    # Verificar si ya existe
     existing = db.query(MatchParticipation).filter(
         and_(
             MatchParticipation.match_id == kwargs["match_id"],
@@ -49,11 +48,13 @@ def get_participations_by_match(db: Session, match_id: str):
     ).all()
 
 
-def get_participations_by_puuid(db: Session, puuid: str, limit: int = 20):
-    """Obtiene las últimas participaciones de un jugador"""
+def get_participations_by_puuid(db: Session, puuid: str, limit: int = 20, offset: int = 0):
+    """Obtiene las participaciones de un jugador con paginación"""
     return db.query(MatchParticipation).filter(
         MatchParticipation.puuid == puuid
-    ).order_by(MatchParticipation.participation_id.desc()).limit(limit).all()
+    ).order_by(
+        MatchParticipation.participation_id.desc()
+    ).offset(offset).limit(limit).all()
 
 
 def match_exists(db: Session, match_id: str) -> bool:

@@ -13,13 +13,6 @@ player_routes = Blueprint("players", __name__)
 def link_lol_account():
     """
     Vincula cuenta de LoL con usuario autenticado y guarda en DB
-    
-    Body:
-    {
-        "game_name": "fouler44",
-        "tag": "LAN",
-        "platform": "LAN"
-    }
     """
     with get_session() as db:
         try:
@@ -37,7 +30,6 @@ def link_lol_account():
                     "msg": "Faltan parámetros: game_name, tag, platform"
                 }), 400
             
-            # Vincular y guardar
             puuid = link_account(
                 db=db,
                 username=username,
@@ -53,7 +45,6 @@ def link_lol_account():
             }), 200
             
         except ValueError as e:
-            # Error de usuario no encontrado
             return jsonify({
                 "code": 404,
                 "msg": str(e)
@@ -62,7 +53,6 @@ def link_lol_account():
         except requests.exceptions.HTTPError as e:
             status_code = e.response.status_code
             
-            # Mensajes específicos según el código de error
             if status_code == 401:
                 error_msg = "API Key de Riot inválida o expirada. Regenera tu clave en developer.riotgames.com"
             elif status_code == 403:

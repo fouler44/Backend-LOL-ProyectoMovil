@@ -9,10 +9,8 @@ def link_account(db: Session, username, game_name, tag, platform):
     if not user:
         raise ValueError(f"Usuario '{username}' no encontrado")
     
-    # Obtener PUUID
     puuid = get_puuid_by_gametag(game_name, tag, platform)
     
-    # Obtener datos del perfil
     profile = get_summoner(puuid, platform)
     
     upsert_player(
@@ -25,7 +23,6 @@ def link_account(db: Session, username, game_name, tag, platform):
         player_icon=profile["icon"],
     )
     
-    # Vincular con usuario
     update_user_puuid(db, user.user_id, puuid)
     
     return puuid
