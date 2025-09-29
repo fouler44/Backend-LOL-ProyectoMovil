@@ -10,7 +10,7 @@ from routes.user import user_routes
 from routes.match import match_routes
 
 # ✅ Subir un nivel desde backend/ hacia la raíz
-BASE_DIR = Path(__file__).resolve().parent  # Backend-LOL-ProyectoMovil/
+BASE_DIR = Path(__file__).resolve().parent.parent  # Backend-LOL-ProyectoMovil/
 ENV_PATH = BASE_DIR / '.env'
 
 print(ENV_PATH)
