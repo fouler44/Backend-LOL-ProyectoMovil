@@ -6,12 +6,14 @@ from flask_jwt_extended import JWTManager
 
 from routes.base import base_routes
 from routes.players import player_routes
-from routes.users import user_routes
+from routes.user import user_routes
 from routes.match import match_routes
 
 # ✅ Subir un nivel desde backend/ hacia la raíz
-BASE_DIR = Path(__file__).resolve().parent.parent  # Backend-LOL-ProyectoMovil/
+BASE_DIR = Path(__file__).resolve().parent  # Backend-LOL-ProyectoMovil/
 ENV_PATH = BASE_DIR / '.env'
+
+print(ENV_PATH)
 
 load_dotenv(dotenv_path=ENV_PATH)
 
@@ -29,7 +31,7 @@ def create_app():
     
     app.register_blueprint(base_routes, url_prefix="/")
     app.register_blueprint(player_routes, url_prefix="/players")
-    app.register_blueprint(user_routes, url_prefix="/users")
+    app.register_blueprint(user_routes, url_prefix="/user")
     app.register_blueprint(match_routes, url_prefix="/matches")
     
     return app
