@@ -1,9 +1,9 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
-from backend.config.db import get_session
-from backend.crud.user import get_user_by_id
-from backend.services.match_service import fetch_and_save_matches, get_player_match_history
+from config.db import get_session
+from crud.user import get_user_by_id
+from services.match_service import fetch_and_save_matches, get_player_match_history
 
 match_routes = Blueprint("matches", __name__)
 

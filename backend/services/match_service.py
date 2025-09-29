@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
-from backend.clients.riot import get_match_ids_by_puuid, get_match_details
-from backend.crud.match import upsert_match, insert_participation, match_exists
-from backend.utils.data_transformer import transform_match_data
+from clients.riot import get_match_ids_by_puuid, get_match_details
+from crud.match import upsert_match, insert_participation, match_exists
+from utils.data_transformer import transform_match_data
 
 def fetch_and_save_matches(db: Session, puuid: str, platform: str, count: int = 20):
     """
