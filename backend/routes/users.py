@@ -5,6 +5,8 @@ from flask_jwt_extended import get_jwt_identity
 from flask_jwt_extended import jwt_required
 from flask_jwt_extended import JWTManager
 
+from flask_bcrypt import Bcrypt
+
 user_routes = Blueprint("users", __name__)
 
 @user_routes.route("/", methods=["GET"])
