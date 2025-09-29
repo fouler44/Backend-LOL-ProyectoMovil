@@ -1,7 +1,11 @@
+from pathlib import Path
 from dotenv import load_dotenv
 import os
 
-load_dotenv()
+BASE_DIR = Path(__file__).resolve().parent  # Backend-LOL-ProyectoMovil/
+ENV_PATH = BASE_DIR / '.env'
+
+load_dotenv(dotenv_path=ENV_PATH)
 
 RIOT_API_KEY = os.getenv("RIOT_API_KEY", "")
 

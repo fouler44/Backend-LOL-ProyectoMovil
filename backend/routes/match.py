@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from config.db import get_session
-from crud.user import get_user_by_id
+from crud.user import get_user_by_username
 from services.match_service import fetch_and_save_matches, get_player_match_history
 
 match_routes = Blueprint("matches", __name__)
@@ -9,18 +9,10 @@ match_routes = Blueprint("matches", __name__)
 @match_routes.route("/sync", methods=["POST"])
 @jwt_required()
 def sync_my_matches():
-    """
-    Sincroniza las partidas del usuario autenticado
-    
-    Body (opcional):
-    {
-        "count": 20  # cantidad de partidas a sincronizar (default: 20)
-    }
-    """
     with get_session() as db:
         try:
-            app_user_id = get_jwt_identity()
-            user = get_user_by_id(db, app_user_id)
+            username = get_jwt_identity()
+            user = get_user_by_username(db, username)
             
             if not user or not user.puuid:
                 return jsonify({
@@ -28,11 +20,16 @@ def sync_my_matches():
                     "msg": "Usuario no tiene cuenta de LoL vinculada"
                 }), 404
             
-            # Obtener parámetros
             data = request.get_json() or {}
             count = data.get("count", 20)
             
-            # Necesitamos el platform del usuario
+            # Validar count
+            if not isinstance(count, int) or count < 1 or count > 100:
+                return jsonify({
+                    "code": 400,
+                    "msg": "El parámetro 'count' debe ser un entero entre 1 y 100"
+                }), 400
+            
             from crud.player import get_player_by_puuid
             player = get_player_by_puuid(db, user.puuid)
             
@@ -42,7 +39,6 @@ def sync_my_matches():
                     "msg": "Datos del jugador no encontrados"
                 }), 404
             
-            # Sincronizar partidas
             stats = fetch_and_save_matches(
                 db=db,
                 puuid=user.puuid,
@@ -63,20 +59,13 @@ def sync_my_matches():
                 "detail": str(e)
             }), 500
 
-
 @match_routes.route("/history", methods=["GET"])
 @jwt_required()
 def get_my_match_history():
-    """
-    Obtiene el historial de partidas del usuario autenticado desde la DB
-    
-    Query params:
-    - limit: cantidad de partidas (default: 20)
-    """
     with get_session() as db:
         try:
-            app_user_id = get_jwt_identity()
-            user = get_user_by_id(db, app_user_id)
+            username = get_jwt_identity()
+            user = get_user_by_username(db, username)
             
             if not user or not user.puuid:
                 return jsonify({
@@ -85,6 +74,13 @@ def get_my_match_history():
                 }), 404
             
             limit = request.args.get("limit", 20, type=int)
+            
+            # Validar límite
+            if limit < 1 or limit > 100:
+                return jsonify({
+                    "code": 400,
+                    "msg": "El límite debe estar entre 1 y 100"
+                }), 400
             
             matches = get_player_match_history(db, user.puuid, limit)
             
@@ -100,18 +96,25 @@ def get_my_match_history():
                 "detail": str(e)
             }), 500
 
-
 @match_routes.route("/history/<puuid>", methods=["GET"])
 def get_player_history(puuid: str):
-    """
-    Obtiene el historial de partidas de cualquier jugador por PUUID
-    
-    Query params:
-    - limit: cantidad de partidas (default: 20)
-    """
     with get_session() as db:
         try:
+            # Validar PUUID
+            if not puuid or len(puuid) > 78:
+                return jsonify({
+                    "code": 400,
+                    "msg": "PUUID inválido"
+                }), 400
+            
             limit = request.args.get("limit", 20, type=int)
+            
+            if limit < 1 or limit > 100:
+                return jsonify({
+                    "code": 400,
+                    "msg": "El límite debe estar entre 1 y 100"
+                }), 400
+            
             matches = get_player_match_history(db, puuid, limit)
             
             if not matches:
@@ -131,11 +134,18 @@ def get_player_history(puuid: str):
                 "msg": "Error al obtener historial",
                 "detail": str(e)
             }), 500
-            
+
 @match_routes.route("/<match_id>/details", methods=["GET"])
 def get_match_details(match_id: str):
     with get_session() as db:
         try:
+            # Validar match_id
+            if not match_id or len(match_id) > 50:
+                return jsonify({
+                    "code": 400,
+                    "msg": "Match ID inválido"
+                }), 400
+            
             from crud.match import get_match_by_id, get_participations_by_match
             
             match = get_match_by_id(db, match_id)
@@ -144,9 +154,8 @@ def get_match_details(match_id: str):
             
             participations = get_participations_by_match(db, match_id)
             
-            # Separar por team_id
-            team_100 = []  # Equipo azul
-            team_200 = []  # Equipo rojo
+            team_100 = []
+            team_200 = []
             
             for part in participations:
                 player_data = {

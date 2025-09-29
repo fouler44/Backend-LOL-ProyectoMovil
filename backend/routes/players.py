@@ -1,10 +1,9 @@
-import os
 import requests
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from config.db import get_session
 from crud.player import get_player_by_puuid
-from crud.user import get_user_by_id  
+from crud.user import get_user_by_username  
 from services.link_service import link_account 
 
 player_routes = Blueprint("players", __name__)
@@ -17,9 +16,9 @@ def link_lol_account():
     
     Body:
     {
-        "game_name": "Hide on bush",
-        "tag": "KR1",
-        "platform": "LA1"
+        "game_name": "fouler44",
+        "tag": "LAN",
+        "platform": "LAN"
     }
     """
     with get_session() as db:
@@ -60,12 +59,26 @@ def link_lol_account():
                 "msg": str(e)
             }), 404
         
-        except requests.HTTPError as e:
+        except requests.exceptions.HTTPError as e:
+            status_code = e.response.status_code
+            
+            # Mensajes específicos según el código de error
+            if status_code == 401:
+                error_msg = "API Key de Riot inválida o expirada. Regenera tu clave en developer.riotgames.com"
+            elif status_code == 403:
+                error_msg = "Acceso prohibido. Verifica que tu API Key sea válida"
+            elif status_code == 404:
+                error_msg = f"Jugador '{game_name}#{tag}' no encontrado en la plataforma {platform}"
+            elif status_code == 429:
+                error_msg = "Demasiadas peticiones. Límite de rate excedido"
+            else:
+                error_msg = "Error con API de Riot"
+            
             return jsonify({
-                "code": e.response.status_code,
-                "msg": "Error con API de Riot",
+                "code": status_code,
+                "msg": error_msg,
                 "detail": e.response.text
-            }), e.response.status_code
+            }), status_code
         
         except Exception as e:
             return jsonify({
@@ -107,7 +120,7 @@ def get_my_player():
     """Obtiene la cuenta de LoL del usuario autenticado"""
     with get_session() as db:
         username = get_jwt_identity()
-        user = get_user_by_id(db, username)
+        user = get_user_by_username(db, username)
         
         if not user:
             return jsonify({
