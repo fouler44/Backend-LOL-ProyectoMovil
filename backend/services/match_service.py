@@ -56,7 +56,7 @@ def fetch_and_save_matches(db: Session, puuid: str, platform: str, count: int = 
 
 def get_player_match_history(db: Session, puuid: str, limit: int = 20, offset: int = 0):
     """Obtiene el historial de partidas con paginación"""
-    from backend.crud.match import get_participations_by_puuid, get_match_by_id
+    from crud.match import get_participations_by_puuid, get_match_by_id
     
     participations = get_participations_by_puuid(db, puuid, limit, offset)
     

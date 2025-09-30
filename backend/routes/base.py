@@ -17,14 +17,6 @@ bcrypt = Bcrypt()
 
 base_routes = Blueprint("base", __name__)
 
-'''
-  GET /
-  GET /login
-  POST /login
-  GET /signup
-  POST /signup
-'''
-
 @base_routes.route("/", methods=["GET"])
 def landing():
     code = 200
