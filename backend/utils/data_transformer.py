@@ -82,6 +82,7 @@ def transform_match_data(match_data):
         "game_mode": game_mode,
         "game_status": game_status,
         "patch_version": patch_version,
+        "game_start_ts": game_start_ts
     }
 
     # ---- Participantes → MatchParticipation ----
