@@ -70,6 +70,7 @@ def get_player_match_history(db: Session, puuid: str, limit: int = 20, offset: i
                 "game_mode": match.game_mode,
                 "game_status": match.game_status,
                 "patch_version": match.patch_version,
+                "game_start_ts": match.game_start_ts
             },
             "performance": {
                 "champion_id": part.champion_id,
