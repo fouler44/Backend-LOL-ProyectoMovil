@@ -50,11 +50,15 @@ def get_participations_by_match(db: Session, match_id: str):
 
 def get_participations_by_puuid(db: Session, puuid: str, limit: int = 20, offset: int = 0):
     """Obtiene las participaciones de un jugador con paginación"""
-    return db.query(MatchParticipation).filter(
-        MatchParticipation.puuid == puuid
-    ).order_by(
-        MatchParticipation.participation_id.desc()
-    ).offset(offset).limit(limit).all()
+    return (
+        db.query(MatchParticipation)
+        .join(LolMatch, MatchParticipation.match_id == LolMatch.match_id)
+        .filter(MatchParticipation.puuid == puuid)
+        .order_by(LolMatch.game_start_ts.desc().nullslast())
+        .offset(offset)
+        .limit(limit)
+        .all()
+    )
 
 
 def match_exists(db: Session, match_id: str) -> bool:

@@ -1,5 +1,5 @@
 from sqlalchemy import (
-    Column, Index, String, Integer, ForeignKey, Boolean,
+    BigInteger, Column, Index, String, Integer, ForeignKey, Boolean,
     CheckConstraint, Numeric, ARRAY, UniqueConstraint
 )
 from config.db import Base
@@ -12,6 +12,7 @@ class LolMatch(Base):
     game_mode = Column(String(25), nullable=False)
     game_status = Column(String(20), nullable=False)
     patch_version = Column(String(30))
+    game_start_ts = Column(BigInteger, nullable=True, index=True)
 
     __table_args__ = (
         CheckConstraint("duration_seconds > 0"),

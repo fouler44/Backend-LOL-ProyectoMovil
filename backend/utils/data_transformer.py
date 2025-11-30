@@ -74,6 +74,7 @@ def transform_match_data(match_data):
     game_mode    = clean_str(info.get("gameMode") or "UNKNOWN", max_len=25)
     game_status  = clean_str(info.get("endOfGameResult") or "UNKNOWN", max_len=20)
     patch_version= clean_str(info.get("gameVersion") or "UNKNOWN", max_len=30)
+    game_start_ts = coerce_int(info.get("gameStartTimestamp"))
 
     match_info = {
         "match_id": match_id,
