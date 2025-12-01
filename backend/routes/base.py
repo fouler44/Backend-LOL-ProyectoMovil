@@ -27,7 +27,8 @@ def landing():
 
 @base_routes.route("/login", methods=["POST"])
 def login():
-    data = request.get_json()
+    data = request.get_json() or {}
+
     username = data.get("username")
     password = data.get("password")
 
@@ -37,9 +38,14 @@ def login():
             "code": code,
             "msg": "Username and password required"
         }), code
-    
+
     conn = SessionLocal()
-    user = conn.scalars(select(AppUser).filter_by(username=username).limit(1)).first()
+    try:
+        user = conn.scalars(
+            select(AppUser).filter_by(username=username).limit(1)
+        ).first()
+    finally:
+        conn.close()
 
     if not user or not bcrypt.check_password_hash(user.data()["hashed_password"], password):
         code = 401
@@ -48,10 +54,13 @@ def login():
             "msg": "Invalid credentials"
         }), code
 
+    access_token = create_access_token(
+        identity=username,
+        expires_delta=datetime.timedelta(minutes=60)
+    )
 
-    access_token = create_access_token(identity=username, expires_delta=datetime.timedelta(minutes=60))
     code = 200
-    return jsonify(access_token=access_token)
+    return jsonify(access_token=access_token), code
 
 @base_routes.route("/dashboard", methods=["GET"])
 @jwt_required()

@@ -23,103 +23,132 @@ user_routes = Blueprint("user", __name__)
 @jwt_required()
 def get_authenticated_user():
     username = get_jwt_identity()
+
     conn = SessionLocal()
-    user = conn.scalars(select(AppUser).filter_by(username=username)).first()
+    try:
+        user = conn.scalars(
+            select(AppUser).filter_by(username=username).limit(1)
+        ).first()
+    finally:
+        conn.close()
+
     if not user:
         code = 404
         return jsonify({
             "code": code,
             "msg": "El usuario proporcionado no existe"
         }), code
-    
+
     code = 200
     return jsonify({
         "code": code,
         "user": user.data()
-    })
+    }), code
+
+
 
 @user_routes.route("/create", methods=["POST"])
 def signup():
-    data = request.get_json()
+    """
+    Crea un nuevo usuario (registro).
+    """
+    data = request.get_json() or {}
     username = data.get("username")
     password = data.get("password")
+
     if not username or not password:
         code = 400
         return jsonify({
             "code": code,
-            "msg": "Username and password required"
+            "msg": "Se requiere username y password"
         }), code
 
     conn = SessionLocal()
-    user = conn.scalars(select(AppUser).filter_by(username=username)).first()
-    if user:
-        code = 409
-        return jsonify({
-            "code": code,
-            "msg": f"El usuario {username} ya existe"
-        }), code
-    
-    hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
-    new_user = AppUser(username=username, hashed_password=hashed_password)
-    conn.add(new_user)
-    conn.commit()
-    conn.close()
+    try:
+        existing = conn.scalars(
+            select(AppUser).filter_by(username=username).limit(1)
+        ).first()
 
-    access_token = create_access_token(identity=username, expires_delta=datetime.timedelta(minutes=60))
+        if existing:
+            code = 409
+            return jsonify({
+                "code": code,
+                "msg": f"El usuario {username} ya existe"
+            }), code
 
-    code = 200
+        hashed_password = bcrypt.generate_password_hash(password).decode("utf-8")
+        new_user = AppUser(
+            username=username,
+            hashed_password=hashed_password,
+        )
+        conn.add(new_user)
+        conn.commit()
+    finally:
+        conn.close()
+
+    code = 201
     return jsonify({
         "code": code,
-        "msg": f"User {username} created",
-        "access_token": access_token
+        "msg": f"Usuario {username} creado correctamente"
     }), code
+
 
 @user_routes.route("/edit/pwd", methods=["PUT", "PATCH"])
 @jwt_required()
 def change_pwd():
-    data = request.get_json()
     username = get_jwt_identity()
-    current_pwd = data.get("password")
-    new_pwd = data.get("new_password")
-    if not current_pwd or not new_pwd:
+    data = request.get_json() or {}
+
+    current_password = data.get("password")
+    new_password = data.get("new_password")
+
+    if not current_password or not new_password:
         code = 400
         return jsonify({
             "code": code,
-            "msg": "Se requieren los parametros 'password' y 'new_password'"
+            "msg": "Se requieren 'password' y 'new_password'"
         }), code
 
     conn = SessionLocal()
-    user = conn.scalars(select(AppUser).filter_by(username=username)).first()
-    if not user:
-        code = 404
-        return jsonify({
-            "code": code,
-            "msg": "El usuario proporcionado no existe"
-        }), code
-    
-    user_data = user.data()
-    if not bcrypt.check_password_hash(user_data["hashed_password"], current_pwd):
-        code = 401
-        return jsonify({
-            "code": code,
-            "msg": "Credenciales incorrectas"
-        }), code
-    
-    user.hashed_password = bcrypt.generate_password_hash(new_pwd).decode("utf-8")
-    conn.commit()
-    conn.close()
+    try:
+        user = conn.scalars(
+            select(AppUser).filter_by(username=username).limit(1)
+        ).first()
+
+        if not user:
+            code = 404
+            return jsonify({
+                "code": code,
+                "msg": "El usuario proporcionado no existe"
+            }), code
+
+        if not bcrypt.check_password_hash(user.data()["hashed_password"], current_password):
+            code = 401
+            return jsonify({
+                "code": code,
+                "msg": "Credenciales incorrectas"
+            }), code
+
+        hashed_password = bcrypt.generate_password_hash(new_password).decode("utf-8")
+        user.hashed_password = hashed_password
+        conn.add(user)
+        conn.commit()
+    finally:
+        conn.close()
 
     code = 200
     return jsonify({
         "code": code,
-        "msg": f"Contraseña del usuario {username} actualizada"
-    })
+        "msg": "Contraseña actualizada correctamente"
+    }), code
+
 
 @user_routes.route("/edit/puuid", methods=["PUT", "PATCH"])
 @jwt_required()
 def change_puuid():
-    data = request.get_json()
     username = get_jwt_identity()
+    data = request.get_json() or {}
+
     puuid = data.get("puuid")
     if not puuid:
         code = 400
@@ -129,60 +158,70 @@ def change_puuid():
         }), code
 
     conn = SessionLocal()
-    user = conn.scalars(select(AppUser).filter_by(username=username)).first()
-    if not user:
-        code = 404
-        return jsonify({
-            "code": code,
-            "msg": "El usuario proporcionado no existe"
-        }), code
-    
-    update_user_puuid(conn, user.data()["user_id"], puuid)
-    conn.commit()
-    conn.close()
+    try:
+        user = conn.scalars(
+            select(AppUser).filter_by(username=username).limit(1)
+        ).first()
+
+        if not user:
+            code = 404
+            return jsonify({
+                "code": code,
+                "msg": "El usuario proporcionado no existe"
+            }), code
+
+        update_user_puuid(conn, user.data()["user_id"], puuid)
+        conn.commit()
+    finally:
+        conn.close()
 
     code = 200
     return jsonify({
         "code": code,
         "msg": f"PUUID del usuario {username} actualizada: {puuid}"
-    })
-
+    }), code
+    
 @user_routes.route("/delete", methods=["DELETE"])
 @jwt_required()
 def delete_user():
-    data = request.get_json()
     username = get_jwt_identity()
+    data = request.get_json() or {}
     password = data.get("password")
+
     if not password:
         code = 400
         return jsonify({
             "code": code,
-            "msg": "Se requiere el parámetro 'password'"
+            "msg": "Se requiere 'password' para eliminar la cuenta"
         }), code
 
     conn = SessionLocal()
-    user = conn.scalars(select(AppUser).filter_by(username=username)).first()
-    if not user:
-        code = 404
-        return jsonify({
-            "code": code,
-            "msg": "El usuario proporcionado no existe"
-        }), code
-    
-    user_data = user.data()
-    if not bcrypt.check_password_hash(user_data["hashed_password"], password):
-        code = 401
-        return jsonify({
-            "code": code,
-            "msg": "Credenciales incorrectas"
-        }), code
-    
-    conn.delete(user)
-    conn.commit()
-    conn.close()
+    try:
+        user = conn.scalars(
+            select(AppUser).filter_by(username=username).limit(1)
+        ).first()
+
+        if not user:
+            code = 404
+            return jsonify({
+                "code": code,
+                "msg": "El usuario proporcionado no existe"
+            }), code
+
+        if not bcrypt.check_password_hash(user.data()["hashed_password"], password):
+            code = 401
+            return jsonify({
+                "code": code,
+                "msg": "Credenciales incorrectas"
+            }), code
+
+        conn.delete(user)
+        conn.commit()
+    finally:
+        conn.close()
 
     code = 200
     return jsonify({
         "code": code,
         "msg": f"Usuario {username} eliminado"
-    })
+    }), code
